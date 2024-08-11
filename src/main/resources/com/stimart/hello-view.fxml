@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.stimart.Controller.PaintController">
+  <top>
+    <ToolBar>
+      <Button text="Pen" onAction="#usePen"/>
+      <Button text="Eraser" onAction="#useEraser"/>
+    </ToolBar>
+  </top>
+  <center>
+    <StackPane>
+      <Canvas fx:id="canvas" width="800" height="600"/>
+    </StackPane>
+  </center>
+</BorderPane>
