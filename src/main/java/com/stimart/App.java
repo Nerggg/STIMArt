@@ -1,7 +1,6 @@
 package com.stimart;
 
 import com.stimart.Class.Shortcut;
-import com.stimart.Controller.PaintController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -28,31 +27,25 @@ public class App extends Application {
         primaryStage.show();
     }
 
-//    private void handleKeyPress(KeyEvent event) {
-//        Shortcut s = Shortcut.getInstance();
-//        switch (event.getCode()) {
-//            case P:
-//                s.mode = "pen";
-//                break;
-//            case E:
-//                s.mode = "eraser";
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-
     private void handleKeyPress(KeyEvent event) {
         Shortcut s = Shortcut.getInstance();
-        if (event.getCode() == KeyCode.P) {
+        if (event.isControlDown() && event.getCode() == KeyCode.X) {
+            System.out.println("cut");
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.C) {
+            System.out.println("copy");
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.P) {
+            System.out.println("paste");
+        }
+        else if (event.getCode() == KeyCode.P) {
             s.mode = "pen";
         }
         else if (event.getCode() == KeyCode.E) {
             s.mode = "eraser";
         }
-        else if (event.isControlDown() && event.getCode() == KeyCode.S) {
-            // ntar buat fungsi save
-            System.out.println("save");
+        else if (event.getCode() == KeyCode.DELETE) {
+            System.out.println("delete");
         }
     }
 
