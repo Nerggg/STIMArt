@@ -5,6 +5,7 @@ import com.stimart.Controller.PaintController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -27,17 +28,31 @@ public class App extends Application {
         primaryStage.show();
     }
 
+//    private void handleKeyPress(KeyEvent event) {
+//        Shortcut s = Shortcut.getInstance();
+//        switch (event.getCode()) {
+//            case P:
+//                s.mode = "pen";
+//                break;
+//            case E:
+//                s.mode = "eraser";
+//                break;
+//            default:
+//                break;
+//        }
+//    }
+
     private void handleKeyPress(KeyEvent event) {
         Shortcut s = Shortcut.getInstance();
-        switch (event.getCode()) {
-            case P:
-                s.mode = "pen";
-                break;
-            case E:
-                s.mode = "eraser";
-                break;
-            default:
-                break;
+        if (event.getCode() == KeyCode.P) {
+            s.mode = "pen";
+        }
+        else if (event.getCode() == KeyCode.E) {
+            s.mode = "eraser";
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.S) {
+            // ntar buat fungsi save
+            System.out.println("save");
         }
     }
 

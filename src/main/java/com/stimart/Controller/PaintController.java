@@ -6,19 +6,20 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-/**
- * Controller class for managing the paint application.
- */
 public class PaintController {
 
     @FXML
     private Canvas canvas;
+
+    @FXML
+    private ColorPicker colorPicker;
 
     private GraphicsContext gc;
 
@@ -32,10 +33,12 @@ public class PaintController {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2);
 
+        // Set the initial color in the ColorPicker
+        colorPicker.setValue(Color.BLACK);
+
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
         canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
 
-        // Use Timeline to check the Shortcut mode every 100ms
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), e -> checkShortcutMode()));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
@@ -71,7 +74,7 @@ public class PaintController {
 
     @FXML
     private void usePen() {
-        gc.setStroke(Color.BLACK);
+        gc.setStroke(colorPicker.getValue());
         canvas.setCursor(Cursor.DEFAULT);
         setPenSize(1);
     }
@@ -81,6 +84,13 @@ public class PaintController {
         gc.setStroke(Color.WHITE);
         canvas.setCursor(createEraserCursor());
         setPenSize(10);
+    }
+
+    @FXML
+    private void changePenColor() {
+        if ("pen".equals(lastMode)) {
+            gc.setStroke(colorPicker.getValue());
+        }
     }
 
     private void setPenSize(double size) {
