@@ -17,38 +17,34 @@ public class PaintController {
 
     @FXML
     private Canvas canvas;
-
     @FXML
     private Canvas topCanvas;
 
     @FXML
     private ColorPicker colorPicker;
 
-    private GraphicsContext gc;
+    private GraphicsContext gcBottom;
     private GraphicsContext gcTop;
 
     private String lastMode = "";
+
     private double startX, startY, endX, endY;
 
     @FXML
     public void initialize() {
-        gc = canvas.getGraphicsContext2D();
-        gc.setFill(Color.WHITE);
-        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
+        gcBottom = canvas.getGraphicsContext2D();
+        gcBottom.setFill(Color.WHITE);
+        gcBottom.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gcBottom.setStroke(Color.BLACK);
+        gcBottom.setLineWidth(2);
 
         gcTop = topCanvas.getGraphicsContext2D();
 
         // Set the initial color in the ColorPicker
         colorPicker.setValue(Color.BLACK);
 
-        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
-        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
-
-        topCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onTopCanvasMousePressed);
-        topCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onTopCanvasMouseDragged);
-        topCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::onTopCanvasMouseReleased);
+        topCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
+        topCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), e -> checkShortcutMode()));
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -76,55 +72,34 @@ public class PaintController {
     }
 
     private void onMousePressed(MouseEvent event) {
-        if ("pen".equals(lastMode)) {
-            gc.beginPath();
-            gc.moveTo(event.getX(), event.getY());
-            gc.stroke();
-        }
-    }
-
-    private void onMouseDragged(MouseEvent event) {
-        if ("pen".equals(lastMode)) {
-            gc.lineTo(event.getX(), event.getY());
-            gc.stroke();
-        }
-    }
-
-    private void onTopCanvasMousePressed(MouseEvent event) {
-        if ("select".equals(lastMode)) {
+        if (lastMode.equals("select")) {
             startX = event.getX();
             startY = event.getY();
             gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
         }
         else {
-            onMousePressed(event);
+            gcBottom.beginPath();
+            gcBottom.moveTo(event.getX(), event.getY());
+            gcBottom.stroke();
         }
     }
 
-    private void onTopCanvasMouseDragged(MouseEvent event) {
-        if ("select".equals(lastMode)) {
+    private void onMouseDragged(MouseEvent event) {
+        if (lastMode.equals("select")) {
             endX = event.getX();
             endY = event.getY();
-            drawSelectBox();
+            drawSelectBox(gcTop);
         }
         else {
-            onMouseDragged(event);
-        }
-    }
-
-    private void onTopCanvasMouseReleased(MouseEvent event) {
-        if ("select".equals(lastMode)) {
-            endX = event.getX();
-            endY = event.getY();
-            drawSelectBox();
-            gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
+            gcBottom.lineTo(event.getX(), event.getY());
+            gcBottom.stroke();
         }
     }
 
     @FXML
     private void usePen() {
         lastMode = "pen";
-        gcTop.setStroke(colorPicker.getValue());
+        gcBottom.setStroke(colorPicker.getValue());
         topCanvas.setCursor(Cursor.DEFAULT);
         setPenSize(1);
     }
@@ -132,10 +107,9 @@ public class PaintController {
     @FXML
     private void useEraser() {
         lastMode = "eraser";
-        gcTop.setStroke(Color.WHITE);
+        gcBottom.setStroke(Color.WHITE);
         topCanvas.setCursor(createEraserCursor());
         setPenSize(10);
-        System.out.println("eraserrr");
     }
 
     @FXML
@@ -147,12 +121,12 @@ public class PaintController {
     @FXML
     private void changePenColor() {
         if ("pen".equals(lastMode)) {
-            gcTop.setStroke(colorPicker.getValue());
+            gcBottom.setStroke(colorPicker.getValue());
         }
     }
 
     private void setPenSize(double size) {
-        gcTop.setLineWidth(size);
+        gcBottom.setLineWidth(size);
     }
 
     private Cursor createEraserCursor() {
@@ -164,15 +138,15 @@ public class PaintController {
         return new ImageCursor(cursorCanvas.snapshot(null, null), size / 2, size / 2);
     }
 
-    private void drawSelectBox() {
+    private void drawSelectBox(GraphicsContext gc) {
         double x = Math.min(startX, endX);
         double y = Math.min(startY, endY);
         double width = Math.abs(endX - startX);
         double height = Math.abs(endY - startY);
 
-        gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
-        gcTop.setStroke(Color.BLUE);
-        gcTop.setLineDashes(6);
-        gcTop.strokeRect(x, y, width, height);
+        gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+        gc.setStroke(Color.BLUE);
+        gc.setLineDashes(6);
+        gc.strokeRect(x, y, width, height);
     }
 }
