@@ -10,6 +10,7 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.stimart.Controller.PaintController">
   <top>
     <ToolBar>
+      <Button text="Move" onAction="#useMove"/>
       <Button text="Pen" onAction="#usePen"/>
       <Button text="Eraser" onAction="#useEraser"/>
       <Button text="Select" onAction="#useSelect"/>

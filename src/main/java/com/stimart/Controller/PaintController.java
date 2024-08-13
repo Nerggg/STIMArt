@@ -9,6 +9,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
@@ -45,29 +47,37 @@ public class PaintController {
 
         topCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
         topCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
-
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), e -> checkShortcutMode()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
     }
 
-    private void checkShortcutMode() {
-        Shortcut shortcut = Shortcut.getInstance();
-        if (!lastMode.equals(shortcut.mode)) {
-            lastMode = shortcut.mode;
-            switch (lastMode) {
-                case "pen":
-                    usePen();
-                    break;
-                case "eraser":
-                    useEraser();
-                    break;
-                case "select":
-                    useSelect();
-                    break;
-                default:
-                    break;
-            }
+    @FXML
+    public void checkShortcutMode(KeyEvent event) {
+        if (event.isControlDown() && event.getCode() == KeyCode.X) {
+            System.out.println("cut");
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.C) {
+            System.out.println("copy");
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.P) {
+            System.out.println("paste");
+        }
+        else if (event.getCode() == KeyCode.M) {
+            lastMode = "move";
+            useMove();
+        }
+        else if (event.getCode() == KeyCode.P) {
+            lastMode = "pen";
+            usePen();
+        }
+        else if (event.getCode() == KeyCode.E) {
+            lastMode = "eraser";
+            useEraser();
+        }
+        else if (event.getCode() == KeyCode.S) {
+            lastMode = "select";
+            useSelect();
+        }
+        else if (event.getCode() == KeyCode.DELETE) {
+            System.out.println("delete");
         }
     }
 
@@ -97,8 +107,12 @@ public class PaintController {
     }
 
     @FXML
+    private void useMove() {
+        topCanvas.setCursor(Cursor.MOVE);
+    }
+
+    @FXML
     private void usePen() {
-        lastMode = "pen";
         gcBottom.setStroke(colorPicker.getValue());
         topCanvas.setCursor(Cursor.DEFAULT);
         setPenSize(1);
@@ -106,7 +120,6 @@ public class PaintController {
 
     @FXML
     private void useEraser() {
-        lastMode = "eraser";
         gcBottom.setStroke(Color.WHITE);
         topCanvas.setCursor(createEraserCursor());
         setPenSize(10);
@@ -114,7 +127,6 @@ public class PaintController {
 
     @FXML
     private void useSelect() {
-        lastMode = "select";
         topCanvas.setCursor(Cursor.CROSSHAIR);
     }
 
