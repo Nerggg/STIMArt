@@ -44,6 +44,9 @@ public class App extends Application {
         else if (event.getCode() == KeyCode.E) {
             s.mode = "eraser";
         }
+        else if (event.getCode() == KeyCode.S) {
+            s.mode = "select";
+        }
         else if (event.getCode() == KeyCode.DELETE) {
             System.out.println("delete");
         }
