@@ -37,8 +37,9 @@ public class PaintController {
 
     // selection
     private double selectStartX, selectStartY, selectEndX, selectEndY;
-    private List<LineSegment> lineSegments = new ArrayList<>();
-    private List<LineSegment> selectedSegments = new ArrayList<>();
+    private ArrayList<LineSegment> lineSegments = new ArrayList<>();
+    private ArrayList<LineSegment> selectedSegments = new ArrayList<>();
+    private ArrayList<LineSegment> eraseSegments = new ArrayList<>();
 
     // drawing
     private double startX, startY, endX, endY;
@@ -159,9 +160,17 @@ public class PaintController {
             endY = event.getY();
             gcBottom.lineTo(endX, endY);
             gcBottom.stroke();
-            lineSegments.add(new LineSegment(startX, startY, endX, endY, colorPicker.getValue(), gcBottom.getLineWidth()));
+            if (lastMode.equals("eraser")) {
+                eraseSegments.add(new LineSegment(startX, startY, endX, endY, Color.WHITE, gcBottom.getLineWidth()));
+            }
+            else {
+                lineSegments.add(new LineSegment(startX, startY, endX, endY, colorPicker.getValue(), gcBottom.getLineWidth()));
+            }
             startX = endX;
             startY = endY;
+            System.out.println(eraseSegments.size());
+            lineSegments = getNonOverlappingSegments(lineSegments, eraseSegments);
+            eraseSegments.clear();
         }
     }
 
@@ -263,5 +272,24 @@ public class PaintController {
                 selectedSegments.add(segment);
             }
         }
+    }
+
+    private ArrayList<LineSegment> getNonOverlappingSegments(ArrayList<LineSegment> A, ArrayList<LineSegment> B) {
+        ArrayList<LineSegment> nonOverlappingSegments = new ArrayList<>();
+
+        for (LineSegment segmentA : A) {
+            boolean overlaps = false;
+            for (LineSegment segmentB : B) {
+                if (segmentA.overlaps(segmentB)) {
+                    overlaps = true;
+                    break;
+                }
+            }
+            if (!overlaps) {
+                nonOverlappingSegments.add(segmentA);
+            }
+        }
+
+        return nonOverlappingSegments;
     }
 }

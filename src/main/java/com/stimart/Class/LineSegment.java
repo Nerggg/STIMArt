@@ -27,4 +27,20 @@ public class LineSegment {
         endX += deltaX;
         endY += deltaY;
     }
+
+    public boolean overlaps(LineSegment other) {
+        double thisMinX = Math.min(this.startX, this.endX);
+        double thisMaxX = Math.max(this.startX, this.endX);
+        double thisMinY = Math.min(this.startY, this.endY);
+        double thisMaxY = Math.max(this.startY, this.endY);
+
+        double otherMinX = Math.min(other.startX, other.endX);
+        double otherMaxX = Math.max(other.startX, other.endX);
+        double otherMinY = Math.min(other.startY, other.endY);
+        double otherMaxY = Math.max(other.startY, other.endY);
+
+        // Check if bounding boxes intersect
+        return (thisMinX <= otherMaxX && thisMaxX >= otherMinX &&
+                thisMinY <= otherMaxY && thisMaxY >= otherMinY);
+    }
 }
