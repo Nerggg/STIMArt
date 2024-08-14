@@ -1,13 +1,17 @@
 package com.stimart.Class;
 
-public class LineSegment {
-    double startX, startY, endX, endY;
+import javafx.scene.paint.Color;
 
-    public LineSegment(double startX, double startY, double endX, double endY) {
+public class LineSegment {
+    public double startX, startY, endX, endY;
+    public Color color;
+
+    public LineSegment(double startX, double startY, double endX, double endY, Color color) {
         this.startX = startX;
         this.startY = startY;
         this.endX = endX;
         this.endY = endY;
+        this.color = color;
     }
 
     // Check if the line segment is within the specified rectangle

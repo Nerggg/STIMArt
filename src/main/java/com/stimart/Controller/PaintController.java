@@ -43,8 +43,6 @@ public class PaintController {
         gcBottom = bottomCanvas.getGraphicsContext2D();
         gcBottom.setFill(Color.WHITE);
         gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
-        gcBottom.setStroke(Color.BLACK);
-        gcBottom.setLineWidth(2);
 
         gcTop = topCanvas.getGraphicsContext2D();
 
@@ -54,6 +52,7 @@ public class PaintController {
         topCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
         topCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
         topCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
+        usePen();
     }
 
     @FXML
@@ -79,12 +78,22 @@ public class PaintController {
         else if (event.getCode() == KeyCode.S) {
             useSelect();
         }
+        else if (event.getCode() == KeyCode.ENTER) {
+            gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
+            selectStartX = 0;
+            selectEndX = 0;
+            selectStartY = 0;
+            selectEndY = 0;
+        }
         else if (event.getCode() == KeyCode.DELETE) {
             System.out.println("delete");
         }
     }
 
     private void onMousePressed(MouseEvent event) {
+//        if (lastMode.isEmpty()) {
+//            usePen();
+//        }
         if (lastMode.equals("select")) {
             selectStartX = event.getX();
             selectStartY = event.getY();
@@ -119,6 +128,7 @@ public class PaintController {
 
             startX = event.getX();
             startY = event.getY();
+            drawAll(gcBottom);
             drawSelectBox(gcTop);
         }
         else {
@@ -126,7 +136,7 @@ public class PaintController {
             endY = event.getY();
             gcBottom.lineTo(endX, endY);
             gcBottom.stroke();
-            lineSegments.add(new LineSegment(startX, startY, endX, endY));
+            lineSegments.add(new LineSegment(startX, startY, endX, endY, colorPicker.getValue()));
             startX = endX;
             startY = endY;
         }
@@ -196,6 +206,16 @@ public class PaintController {
         gc.setStroke(Color.BLUE);
         gc.setLineDashes(6);
         gc.strokeRect(x, y, width, height);
+    }
+
+    private void drawAll(GraphicsContext gc) {
+        gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+        gcBottom.setFill(Color.WHITE);
+        gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
+        for (LineSegment segment : lineSegments) {
+            gc.setStroke(segment.color);
+            gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
+        }
     }
 
     private void selectSegments(double boxX, double boxY, double boxWidth, double boxHeight) {
