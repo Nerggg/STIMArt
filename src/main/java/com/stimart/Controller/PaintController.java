@@ -7,6 +7,8 @@ import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -21,9 +23,12 @@ public class PaintController {
     private Canvas bottomCanvas;
     @FXML
     private Canvas topCanvas;
-
     @FXML
     private ColorPicker colorPicker;
+    @FXML
+    private Slider sizeSlider;
+    @FXML
+    private TextField sizeField;
 
     private GraphicsContext gcBottom;
     private GraphicsContext gcTop;
@@ -46,13 +51,36 @@ public class PaintController {
 
         gcTop = topCanvas.getGraphicsContext2D();
 
-        // Set the initial color in the ColorPicker
         colorPicker.setValue(Color.BLACK);
 
         topCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
         topCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
         topCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
         usePen();
+
+        sizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            sizeField.setText(String.valueOf(newValue.intValue()));
+        });
+
+        sizeField.textProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                int value = Integer.parseInt(newValue);
+                if (value >= sizeSlider.getMin() && value <= sizeSlider.getMax()) {
+                    sizeSlider.setValue(value);
+                } else {
+                    sizeField.setText(oldValue);
+                }
+            } catch (NumberFormatException e) {
+                sizeField.setText(oldValue);
+            }
+            if (lastMode.equals("eraser")) {
+                topCanvas.setCursor(createEraserCursor());
+                setPenSize(Double.valueOf(sizeField.getText()) + 9);
+            }
+            else {
+                setPenSize(Double.valueOf(sizeField.getText()));
+            }
+        });
     }
 
     @FXML
@@ -131,7 +159,7 @@ public class PaintController {
             endY = event.getY();
             gcBottom.lineTo(endX, endY);
             gcBottom.stroke();
-            lineSegments.add(new LineSegment(startX, startY, endX, endY, colorPicker.getValue()));
+            lineSegments.add(new LineSegment(startX, startY, endX, endY, colorPicker.getValue(), gcBottom.getLineWidth()));
             startX = endX;
             startY = endY;
         }
@@ -151,18 +179,18 @@ public class PaintController {
 
     @FXML
     private void usePen() {
+        setPenSize(Double.valueOf(sizeField.getText()));
         lastMode = "pen";
         gcBottom.setStroke(colorPicker.getValue());
         topCanvas.setCursor(Cursor.DEFAULT);
-        setPenSize(1);
     }
 
     @FXML
     private void useEraser() {
+        setPenSize(Double.valueOf(sizeField.getText()) + 9);
         lastMode = "eraser";
         gcBottom.setStroke(Color.WHITE);
         topCanvas.setCursor(createEraserCursor());
-        setPenSize(10);
     }
 
     @FXML
@@ -176,6 +204,12 @@ public class PaintController {
         if ("pen".equals(lastMode)) {
             gcBottom.setStroke(colorPicker.getValue());
         }
+        else if (!selectedSegments.isEmpty()) {
+            for (LineSegment segment : selectedSegments) {
+                segment.color = colorPicker.getValue();
+            }
+            drawAll(gcBottom);
+        }
     }
 
     private void setPenSize(double size) {
@@ -183,7 +217,7 @@ public class PaintController {
     }
 
     private Cursor createEraserCursor() {
-        int size = 16;
+        int size = (int)gcBottom.getLineWidth() + 9;
         Canvas cursorCanvas = new Canvas(size, size);
         GraphicsContext cursorGc = cursorCanvas.getGraphicsContext2D();
         cursorGc.setFill(Color.LIGHTGRAY);
@@ -217,6 +251,7 @@ public class PaintController {
         gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
         for (LineSegment segment : lineSegments) {
             gc.setStroke(segment.color);
+            gc.setLineWidth(segment.size);
             gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
         }
     }
