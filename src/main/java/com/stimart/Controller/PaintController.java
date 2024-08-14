@@ -1,8 +1,6 @@
 package com.stimart.Controller;
 
-import com.stimart.Class.Shortcut;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import com.stimart.Class.LineSegment;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -13,12 +11,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PaintController {
 
     @FXML
-    private Canvas canvas;
+    private Canvas bottomCanvas;
     @FXML
     private Canvas topCanvas;
 
@@ -30,13 +30,19 @@ public class PaintController {
 
     private String lastMode = "";
 
+    // selection
+    private double selectStartX, selectStartY, selectEndX, selectEndY;
+    private List<LineSegment> lineSegments = new ArrayList<>();
+    private List<LineSegment> selectedSegments = new ArrayList<>();
+
+    // drawing
     private double startX, startY, endX, endY;
 
     @FXML
     public void initialize() {
-        gcBottom = canvas.getGraphicsContext2D();
+        gcBottom = bottomCanvas.getGraphicsContext2D();
         gcBottom.setFill(Color.WHITE);
-        gcBottom.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
         gcBottom.setStroke(Color.BLACK);
         gcBottom.setLineWidth(2);
 
@@ -47,6 +53,7 @@ public class PaintController {
 
         topCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
         topCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
+        topCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
     }
 
     @FXML
@@ -61,19 +68,15 @@ public class PaintController {
             System.out.println("paste");
         }
         else if (event.getCode() == KeyCode.M) {
-            lastMode = "move";
             useMove();
         }
         else if (event.getCode() == KeyCode.P) {
-            lastMode = "pen";
             usePen();
         }
         else if (event.getCode() == KeyCode.E) {
-            lastMode = "eraser";
             useEraser();
         }
         else if (event.getCode() == KeyCode.S) {
-            lastMode = "select";
             useSelect();
         }
         else if (event.getCode() == KeyCode.DELETE) {
@@ -83,36 +86,67 @@ public class PaintController {
 
     private void onMousePressed(MouseEvent event) {
         if (lastMode.equals("select")) {
-            startX = event.getX();
-            startY = event.getY();
+            selectStartX = event.getX();
+            selectStartY = event.getY();
             gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
         }
         else {
+            startX = event.getX();
+            startY = event.getY();
             gcBottom.beginPath();
-            gcBottom.moveTo(event.getX(), event.getY());
+            gcBottom.moveTo(startX, startY);
             gcBottom.stroke();
         }
     }
 
     private void onMouseDragged(MouseEvent event) {
         if (lastMode.equals("select")) {
-            endX = event.getX();
-            endY = event.getY();
+            selectEndX = event.getX();
+            selectEndY = event.getY();
+            drawSelectBox(gcTop);
+        }
+        else if (lastMode.equals("move")) {
+            double deltaX = event.getX() - startX;
+            double deltaY = event.getY() - startY;
+            selectStartX += deltaX;
+            selectEndX += deltaX;
+            selectStartY += deltaY;
+            selectEndY += deltaY;
+
+            for (LineSegment segment : selectedSegments) {
+                segment.move(deltaX, deltaY);
+            }
+
+            startX = event.getX();
+            startY = event.getY();
             drawSelectBox(gcTop);
         }
         else {
-            gcBottom.lineTo(event.getX(), event.getY());
+            endX = event.getX();
+            endY = event.getY();
+            gcBottom.lineTo(endX, endY);
             gcBottom.stroke();
+            lineSegments.add(new LineSegment(startX, startY, endX, endY));
+            startX = endX;
+            startY = endY;
+        }
+    }
+
+    private void onMouseReleased(MouseEvent event) {
+        if (lastMode.equals("select")) {
+            selectSegments(Math.min(selectStartX, selectEndX), Math.min(selectStartY, selectEndY), Math.abs(selectEndX - selectStartX), Math.abs(selectEndY - selectStartY));
         }
     }
 
     @FXML
     private void useMove() {
+        lastMode = "move";
         topCanvas.setCursor(Cursor.MOVE);
     }
 
     @FXML
     private void usePen() {
+        lastMode = "pen";
         gcBottom.setStroke(colorPicker.getValue());
         topCanvas.setCursor(Cursor.DEFAULT);
         setPenSize(1);
@@ -120,6 +154,7 @@ public class PaintController {
 
     @FXML
     private void useEraser() {
+        lastMode = "eraser";
         gcBottom.setStroke(Color.WHITE);
         topCanvas.setCursor(createEraserCursor());
         setPenSize(10);
@@ -127,6 +162,7 @@ public class PaintController {
 
     @FXML
     private void useSelect() {
+        lastMode = "select";
         topCanvas.setCursor(Cursor.CROSSHAIR);
     }
 
@@ -151,14 +187,23 @@ public class PaintController {
     }
 
     private void drawSelectBox(GraphicsContext gc) {
-        double x = Math.min(startX, endX);
-        double y = Math.min(startY, endY);
-        double width = Math.abs(endX - startX);
-        double height = Math.abs(endY - startY);
+        double x = Math.min(selectStartX, selectEndX);
+        double y = Math.min(selectStartY, selectEndY);
+        double width = Math.abs(selectEndX - selectStartX);
+        double height = Math.abs(selectEndY - selectStartY);
 
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
         gc.setStroke(Color.BLUE);
         gc.setLineDashes(6);
         gc.strokeRect(x, y, width, height);
+    }
+
+    private void selectSegments(double boxX, double boxY, double boxWidth, double boxHeight) {
+        selectedSegments.clear();
+        for (LineSegment segment : lineSegments) {
+            if (segment.isWithin(boxX, boxY, boxWidth, boxHeight)) {
+                selectedSegments.add(segment);
+            }
+        }
     }
 }
