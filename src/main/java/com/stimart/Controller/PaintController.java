@@ -2,11 +2,11 @@ package com.stimart.Controller;
 
 import com.stimart.Class.LineSegment;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
-import javafx.scene.Cursor;
-import javafx.scene.ImageCursor;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -75,25 +75,20 @@ public class PaintController {
         else if (event.getCode() == KeyCode.E) {
             useEraser();
         }
-        else if (event.getCode() == KeyCode.S) {
+        else if (event.getCode() == KeyCode.S && !lastMode.equals("select")) {
             useSelect();
         }
-        else if (event.getCode() == KeyCode.ENTER) {
-            gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
-            selectStartX = 0;
-            selectEndX = 0;
-            selectStartY = 0;
-            selectEndY = 0;
+        else if (event.getCode() == KeyCode.S && lastMode.equals("select")) {
+            resetSelectBox(gcTop);
         }
         else if (event.getCode() == KeyCode.DELETE) {
-            System.out.println("delete");
+            lineSegments.removeAll(selectedSegments);
+            drawAll(gcBottom);
+            resetSelectBox(gcTop);
         }
     }
 
     private void onMousePressed(MouseEvent event) {
-//        if (lastMode.isEmpty()) {
-//            usePen();
-//        }
         if (lastMode.equals("select")) {
             selectStartX = event.getX();
             selectStartY = event.getY();
@@ -206,6 +201,14 @@ public class PaintController {
         gc.setStroke(Color.BLUE);
         gc.setLineDashes(6);
         gc.strokeRect(x, y, width, height);
+    }
+
+    private void resetSelectBox(GraphicsContext gc) {
+        gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
+        selectStartX = 0;
+        selectEndX = 0;
+        selectStartY = 0;
+        selectEndY = 0;
     }
 
     private void drawAll(GraphicsContext gc) {
