@@ -29,18 +29,19 @@ public class LineSegment {
     }
 
     public boolean overlaps(LineSegment other) {
-        double thisMinX = Math.min(this.startX, this.endX);
-        double thisMaxX = Math.max(this.startX, this.endX);
-        double thisMinY = Math.min(this.startY, this.endY);
-        double thisMaxY = Math.max(this.startY, this.endY);
+        double minX1 = Math.min(this.startX, this.endX) - this.size / 2;
+        double maxX1 = Math.max(this.startX, this.endX) + this.size / 2;
+        double minY1 = Math.min(this.startY, this.endY) - this.size / 2;
+        double maxY1 = Math.max(this.startY, this.endY) + this.size / 2;
 
-        double otherMinX = Math.min(other.startX, other.endX);
-        double otherMaxX = Math.max(other.startX, other.endX);
-        double otherMinY = Math.min(other.startY, other.endY);
-        double otherMaxY = Math.max(other.startY, other.endY);
+        double minX2 = Math.min(other.startX, other.endX) - other.size / 2;
+        double maxX2 = Math.max(other.startX, other.endX) + other.size / 2;
+        double minY2 = Math.min(other.startY, other.endY) - other.size / 2;
+        double maxY2 = Math.max(other.startY, other.endY) + other.size / 2;
 
-        // Check if bounding boxes intersect
-        return (thisMinX <= otherMaxX && thisMaxX >= otherMinX &&
-                thisMinY <= otherMaxY && thisMaxY >= otherMinY);
+        boolean overlapX = (minX1 <= maxX2 && maxX1 >= minX2);
+        boolean overlapY = (minY1 <= maxY2 && maxY1 >= minY2);
+
+        return overlapX && overlapY;
     }
 }

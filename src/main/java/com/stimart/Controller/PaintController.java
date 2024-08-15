@@ -170,7 +170,6 @@ public class PaintController {
             startY = endY;
             System.out.println(eraseSegments.size());
             lineSegments = getNonOverlappingSegments(lineSegments, eraseSegments);
-            eraseSegments.clear();
         }
     }
 
@@ -178,6 +177,7 @@ public class PaintController {
         if (lastMode.equals("select")) {
             selectSegments(Math.min(selectStartX, selectEndX), Math.min(selectStartY, selectEndY), Math.abs(selectEndX - selectStartX), Math.abs(selectEndY - selectStartY));
         }
+        eraseSegments.clear();
     }
 
     @FXML
@@ -278,14 +278,14 @@ public class PaintController {
         ArrayList<LineSegment> nonOverlappingSegments = new ArrayList<>();
 
         for (LineSegment segmentA : A) {
-            boolean overlaps = false;
+            boolean isOverlapping = false;
             for (LineSegment segmentB : B) {
                 if (segmentA.overlaps(segmentB)) {
-                    overlaps = true;
+                    isOverlapping = true;
                     break;
                 }
             }
-            if (!overlaps) {
+            if (!isOverlapping) {
                 nonOverlappingSegments.add(segmentA);
             }
         }
