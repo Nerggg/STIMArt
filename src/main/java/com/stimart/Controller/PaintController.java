@@ -9,8 +9,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
+import java.io.File;
 import java.util.ArrayList;
 
 public class PaintController {
@@ -95,6 +100,9 @@ public class PaintController {
         }
         else if (event.isControlDown() && event.getCode() == KeyCode.V) {
             pasteFromClipboard(gcBottom);
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.O) {
+            openImage();
         }
         else if (event.getCode() == KeyCode.M) {
             useMove();
@@ -367,6 +375,21 @@ public class PaintController {
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void openImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Image File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+        );
+
+        Stage stage = (Stage) bottomCanvas.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            Image image = new Image(file.toURI().toString());
+            gcBottom.drawImage(image, 0, 0, image.getWidth(), image.getHeight());
         }
     }
 }
