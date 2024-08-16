@@ -37,6 +37,7 @@ public class PaintController {
     private ArrayList<LineSegment> lineSegments = new ArrayList<>();
     private ArrayList<LineSegment> selectedSegments = new ArrayList<>();
     private ArrayList<LineSegment> eraseSegments = new ArrayList<>();
+    private ArrayList<LineSegment> pasteTemp = new ArrayList<>();
 
     // drawing
     private double startX, startY, endX, endY;
@@ -251,6 +252,7 @@ public class PaintController {
         selectEndX = 0;
         selectStartY = 0;
         selectEndY = 0;
+        lineSegments.addAll(pasteTemp);
     }
 
     private void drawAll(GraphicsContext gc) {
@@ -258,6 +260,11 @@ public class PaintController {
         gcBottom.setFill(Color.WHITE);
         gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
         for (LineSegment segment : lineSegments) {
+            gc.setStroke(segment.color);
+            gc.setLineWidth(segment.size);
+            gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
+        }
+        for (LineSegment segment : pasteTemp) {
             gc.setStroke(segment.color);
             gc.setLineWidth(segment.size);
             gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
@@ -311,12 +318,13 @@ public class PaintController {
     }
 
     private void pasteFromClipboard(GraphicsContext gc) {
+        pasteTemp.clear();
+        selectedSegments.clear();
         Clipboard clipboard = Clipboard.getSystemClipboard();
         String clipboardContent = clipboard.getString();
         double minStartX = Double.MAX_VALUE;
         double minStartY = Double.MAX_VALUE;
 
-        ArrayList<LineSegment> pasteTemp = new ArrayList<>();
         if (clipboardContent != null) {
             String[] lines = clipboardContent.split("\n");
             for (String line : lines) {
@@ -338,14 +346,13 @@ public class PaintController {
                     segment.endY -= minStartY;
                     segment.startX -= minStartX;
                     segment.startY -= minStartY;
-                    lineSegments.add(segment);
                     selectEndX = formerSelectEndX - formerSelectStartX;
                     selectEndY = formerSelectEndY - formerSelectStartY;
                     selectStartX = 0;
                     selectStartY = 0;
                     drawSelectBox(gcTop);
                     drawAll(gcBottom);
-                    selectSegments(Math.min(selectStartX, selectEndX), Math.min(selectStartY, selectEndY), Math.abs(selectEndX - selectStartX), Math.abs(selectEndY - selectStartY));
+                    selectedSegments.add(segment);
                 } catch (Exception e) {
                     System.err.println("Failed to parse line");
                 }
