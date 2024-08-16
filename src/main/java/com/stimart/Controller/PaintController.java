@@ -9,13 +9,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.paint.Color;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class PaintController {
 
@@ -37,6 +33,7 @@ public class PaintController {
 
     // selection
     private double selectStartX, selectStartY, selectEndX, selectEndY;
+    private double formerSelectStartX, formerSelectStartY, formerSelectEndX, formerSelectEndY;
     private ArrayList<LineSegment> lineSegments = new ArrayList<>();
     private ArrayList<LineSegment> selectedSegments = new ArrayList<>();
     private ArrayList<LineSegment> eraseSegments = new ArrayList<>();
@@ -87,13 +84,16 @@ public class PaintController {
     @FXML
     public void checkShortcutMode(KeyEvent event) {
         if (event.isControlDown() && event.getCode() == KeyCode.X) {
-            System.out.println("cut");
+            copyToClipboard();
+            lineSegments.removeAll(selectedSegments);
+            drawAll(gcBottom);
+            resetSelectBox(gcTop);
         }
         else if (event.isControlDown() && event.getCode() == KeyCode.C) {
-            System.out.println("copy");
+            copyToClipboard();
         }
-        else if (event.isControlDown() && event.getCode() == KeyCode.P) {
-            System.out.println("paste");
+        else if (event.isControlDown() && event.getCode() == KeyCode.V) {
+            pasteFromClipboard(gcBottom);
         }
         else if (event.getCode() == KeyCode.M) {
             useMove();
@@ -168,7 +168,6 @@ public class PaintController {
             }
             startX = endX;
             startY = endY;
-            System.out.println(eraseSegments.size());
             lineSegments = getNonOverlappingSegments(lineSegments, eraseSegments);
         }
     }
@@ -291,5 +290,76 @@ public class PaintController {
         }
 
         return nonOverlappingSegments;
+    }
+
+    private void copyToClipboard() {
+        formerSelectStartX = selectStartX;
+        formerSelectStartY = selectStartY;
+        formerSelectEndX = selectEndX;
+        formerSelectEndY = selectEndY;
+        StringBuilder sb = new StringBuilder();
+        for (LineSegment segment : selectedSegments) {
+            sb.append(String.format("%.2f, %.2f, %.2f, %.2f, %s, %.2f%n",
+                    segment.startX, segment.startY, segment.endX, segment.endY,
+                    segment.color.toString(), segment.size));
+        }
+
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(sb.toString());
+        clipboard.setContent(content);
+    }
+
+    private void pasteFromClipboard(GraphicsContext gc) {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        String clipboardContent = clipboard.getString();
+        double minStartX = Double.MAX_VALUE;
+        double minStartY = Double.MAX_VALUE;
+
+        ArrayList<LineSegment> pasteTemp = new ArrayList<>();
+        if (clipboardContent != null) {
+            String[] lines = clipboardContent.split("\n");
+            for (String line : lines) {
+                LineSegment segment = parseLineSegment(line);
+                pasteTemp.add(segment);
+                if (segment.startX < minStartX) {
+                    minStartX = segment.startX;
+                }
+                if (segment.startY < minStartY) {
+                    minStartY = segment.startY;
+                }
+            }
+        }
+
+            for (LineSegment segment : pasteTemp) {
+                try {
+                    // Parse line into a LineSegment
+                    segment.endX -= minStartX;
+                    segment.endY -= minStartY;
+                    segment.startX -= minStartX;
+                    segment.startY -= minStartY;
+                    lineSegments.add(segment);
+                    selectEndX = formerSelectEndX - formerSelectStartX;
+                    selectEndY = formerSelectEndY - formerSelectStartY;
+                    selectStartX = 0;
+                    selectStartY = 0;
+                    drawSelectBox(gcTop);
+                    drawAll(gcBottom);
+                    selectSegments(Math.min(selectStartX, selectEndX), Math.min(selectStartY, selectEndY), Math.abs(selectEndX - selectStartX), Math.abs(selectEndY - selectStartY));
+                } catch (Exception e) {
+                    System.err.println("Failed to parse line");
+                }
+            }
+        }
+
+    private LineSegment parseLineSegment(String line) {
+        String[] parts = line.split(", ");
+
+        try {
+            return new LineSegment(Double.valueOf(parts[0]), Double.valueOf(parts[1]), Double.valueOf(parts[2]), Double.valueOf(parts[3]), Color.web(parts[4]), Double.valueOf(parts[5]));
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
