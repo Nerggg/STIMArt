@@ -55,6 +55,7 @@ public class PaintController {
 
     // external images
     private ArrayList<ExternalImages> externalImages = new ArrayList<>();
+    private int selectedImage = -1;
 
     @FXML
     public void initialize() {
@@ -145,11 +146,12 @@ public class PaintController {
 
             for (int i = externalImages.size() - 1; i >= 0; i--) {
                 if (isImageClicked(event.getX(), event.getY(), externalImages.get(i))) {
-                    selectStartX = 0;
-                    selectStartY = 0;
-                    selectEndX = externalImages.get(i).image.getWidth();
-                    selectEndY = externalImages.get(i).image.getHeight();
+                    selectStartX = externalImages.get(i).imageX;
+                    selectStartY = externalImages.get(i).imageY;
+                    selectEndX = externalImages.get(i).image.getWidth() + externalImages.get(i).imageX;
+                    selectEndY = externalImages.get(i).image.getHeight() + externalImages.get(i).imageY;
                     drawSelectBox(gcTop);
+                    selectedImage = i;
                     break;
                 }
             }
@@ -176,14 +178,19 @@ public class PaintController {
             selectEndX += deltaX;
             selectStartY += deltaY;
             selectEndY += deltaY;
-
-            for (LineSegment segment : selectedSegments) {
-                segment.move(deltaX, deltaY);
+            if (selectedImage == -1) {
+                for (LineSegment segment : selectedSegments) {
+                    segment.move(deltaX, deltaY);
+                }
             }
-
+            else {
+                externalImages.get(selectedImage).imageX += deltaX;
+                externalImages.get(selectedImage).imageY += deltaY;
+            }
             startX = event.getX();
             startY = event.getY();
             drawAll(gcBottom);
+            drawAllImages(gcImage);
             drawSelectBox(gcTop);
         }
         else {
@@ -277,6 +284,10 @@ public class PaintController {
     }
 
     private void resetSelectBox(GraphicsContext gc) {
+        if (selectedImage != -1) {
+            selectedImage = -1;
+        }
+
         gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
         selectStartX = 0;
         selectEndX = 0;
@@ -287,8 +298,6 @@ public class PaintController {
 
     private void drawAll(GraphicsContext gc) {
         gc.clearRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-        gcBottom.setFill(Color.WHITE);
-        gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
         for (LineSegment segment : lineSegments) {
             gc.setStroke(segment.color);
             gc.setLineWidth(segment.size);
@@ -413,7 +422,13 @@ public class PaintController {
         if (file != null) {
             Image image = new Image(file.toURI().toString());
             externalImages.add(new ExternalImages(image, 0, 0));
+            selectStartX = 0;
+            selectStartY = 0;
+            selectEndX = externalImages.getLast().image.getWidth();
+            selectEndY = externalImages.getLast().image.getHeight();
+            drawSelectBox(gcTop);
             drawAllImages(gcImage);
+            selectedImage = externalImages.size() - 1;
         }
     }
 
@@ -430,5 +445,25 @@ public class PaintController {
         Image image = ei.image;
         return x >= imgX && x <= imgX + image.getWidth() &&
                 y >= imgY && y <= imgY + image.getHeight();
+    }
+
+    @FXML
+    private void upwardImage() {
+        if (selectedImage != -1 && selectedImage != externalImages.size() - 1) {
+            ExternalImages temp = externalImages.remove(selectedImage);
+            selectedImage++;
+            externalImages.add(selectedImage, temp);
+            drawAllImages(gcImage);
+        }
+    }
+
+    @FXML
+    private void downwardImage() {
+        if (selectedImage != -1 && selectedImage != 0) {
+            ExternalImages temp = externalImages.remove(selectedImage);
+            selectedImage--;
+            externalImages.add(selectedImage, temp);
+            drawAllImages(gcImage);
+        }
     }
 }
