@@ -132,8 +132,14 @@ public class PaintController {
             resetSelectBox(gcTop);
         }
         else if (event.getCode() == KeyCode.DELETE) {
-            lineSegments.removeAll(selectedSegments);
-            drawAll(gcBottom);
+            if (selectedImage == -1) {
+                lineSegments.removeAll(selectedSegments);
+                drawAll(gcBottom);
+            }
+            else {
+                externalImages.remove(selectedImage);
+                drawAllImages(gcImage);
+            }
             resetSelectBox(gcTop);
         }
     }
@@ -207,6 +213,10 @@ public class PaintController {
             startX = endX;
             startY = endY;
             lineSegments = getNonOverlappingSegments(lineSegments, eraseSegments);
+            eraseSegments.clear();
+            drawAll(gcBottom);
+            drawAllImages(gcImage);
+            drawSelectBox(gcTop);
         }
     }
 
