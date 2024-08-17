@@ -1,5 +1,6 @@
 package com.stimart.Controller;
 
+import com.stimart.Class.ExternalImages;
 import com.stimart.Class.LineSegment;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -25,6 +26,10 @@ public class PaintController {
     @FXML
     private Canvas topCanvas;
     @FXML
+    private Canvas imageCanvas;
+    @FXML
+    private Canvas whiteCanvas;
+    @FXML
     private ColorPicker colorPicker;
     @FXML
     private Slider sizeSlider;
@@ -33,6 +38,7 @@ public class PaintController {
 
     private GraphicsContext gcBottom;
     private GraphicsContext gcTop;
+    private GraphicsContext gcImage;
 
     private String lastMode = "";
 
@@ -47,13 +53,18 @@ public class PaintController {
     // drawing
     private double startX, startY, endX, endY;
 
+    // external images
+    private ArrayList<ExternalImages> externalImages = new ArrayList<>();
+
     @FXML
     public void initialize() {
-        gcBottom = bottomCanvas.getGraphicsContext2D();
+        gcBottom = whiteCanvas.getGraphicsContext2D();
         gcBottom.setFill(Color.WHITE);
         gcBottom.fillRect(0, 0, bottomCanvas.getWidth(), bottomCanvas.getHeight());
 
+        gcBottom = bottomCanvas.getGraphicsContext2D();
         gcTop = topCanvas.getGraphicsContext2D();
+        gcImage = imageCanvas.getGraphicsContext2D();
 
         colorPicker.setValue(Color.BLACK);
 
@@ -131,6 +142,17 @@ public class PaintController {
             selectStartX = event.getX();
             selectStartY = event.getY();
             gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
+
+            for (int i = externalImages.size() - 1; i >= 0; i--) {
+                if (isImageClicked(event.getX(), event.getY(), externalImages.get(i))) {
+                    selectStartX = 0;
+                    selectStartY = 0;
+                    selectEndX = externalImages.get(i).image.getWidth();
+                    selectEndY = externalImages.get(i).image.getHeight();
+                    drawSelectBox(gcTop);
+                    break;
+                }
+            }
         }
         else {
             startX = event.getX();
@@ -378,6 +400,7 @@ public class PaintController {
         }
     }
 
+    @FXML
     private void openImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Image File");
@@ -389,7 +412,23 @@ public class PaintController {
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             Image image = new Image(file.toURI().toString());
-            gcBottom.drawImage(image, 0, 0, image.getWidth(), image.getHeight());
+            externalImages.add(new ExternalImages(image, 0, 0));
+            drawAllImages(gcImage);
         }
+    }
+
+    private void drawAllImages(GraphicsContext gc) {
+        gc.clearRect(0, 0, imageCanvas.getWidth(), imageCanvas.getHeight());
+        for (ExternalImages ei : externalImages) {
+            gc.drawImage(ei.image, ei.imageX, ei.imageY, ei.image.getWidth(), ei.image.getHeight());
+        }
+    }
+
+    private boolean isImageClicked(double x, double y, ExternalImages ei) {
+        double imgX = ei.imageX;
+        double imgY = ei.imageY;
+        Image image = ei.image;
+        return x >= imgX && x <= imgX + image.getWidth() &&
+                y >= imgY && y <= imgY + image.getHeight();
     }
 }

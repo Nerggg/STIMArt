@@ -19,10 +19,13 @@
       <ColorPicker fx:id="colorPicker" onAction="#changePenColor" />
          <Slider fx:id="sizeSlider" blockIncrement="1.0" min="1.0" max="20.0" />
          <TextField fx:id="sizeField" prefHeight="26.0" prefWidth="36.0" text="1" />
+      <Button onAction="#openImage" text="Open Image" />
     </ToolBar>
   </top>
   <center>
     <StackPane>
+      <Canvas fx:id="whiteCanvas" height="600" width="800" />
+      <Canvas fx:id="imageCanvas" height="600" width="800" />
       <Canvas fx:id="bottomCanvas" height="600" width="800" />
       <Canvas fx:id="topCanvas" height="600" width="800" />
     </StackPane>
