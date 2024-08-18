@@ -105,14 +105,23 @@ public class ImageBlurring {
         return mergedImage;
     }
 
-    public static Image blurImage(ExternalImages image, int level) {
+    public static Image blurImageCaller(ExternalImages image, int level) {
         if (level == 0) {
             return image.originalImage;
         }
         else {
-            ArrayList<Image> temp = splitImage(image.originalImage);
+            return blurImage(image.originalImage, level);
+        }
+    }
+
+    public static Image blurImage(Image image, int level) {
+        if (level == 1) {
+            return applyAverageColor(image, calculateAverageColor(image));
+        }
+        else {
+            ArrayList<Image> temp = splitImage(image);
             for (int i = 0; i < temp.size(); i++) {
-                temp.set(i, applyAverageColor(temp.get(i), calculateAverageColor(temp.get(i))));
+                temp.set(i, blurImage(temp.get(i), level - 1));
             }
             return mergeImage(temp);
         }

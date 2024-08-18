@@ -112,10 +112,10 @@ public class PaintController {
                 blurLevel.setText("Blur Level: " + newValue.intValue());
                 externalImages.get(selectedImage).blur = newValue.intValue();
                 if (newValue.intValue() == 0) {
-                    externalImages.get(selectedImage).image = ImageBlurring.blurImage(externalImages.get(selectedImage), 0);
+                    externalImages.get(selectedImage).image = ImageBlurring.blurImageCaller(externalImages.get(selectedImage), 0);
                 }
                 else {
-                    externalImages.get(selectedImage).image = ImageBlurring.blurImage(externalImages.get(selectedImage), 11 - newValue.intValue());
+                    externalImages.get(selectedImage).image = ImageBlurring.blurImageCaller(externalImages.get(selectedImage), 11 - newValue.intValue());
                 }
                 drawAllImages(gcImage);
             }
