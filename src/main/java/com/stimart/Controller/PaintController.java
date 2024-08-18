@@ -162,6 +162,22 @@ public class PaintController {
                 }
             }
         }
+        else if (lastMode.equals("bfsFilling")) {
+            if (isClosed(event.getX(), event.getY())) {
+                System.out.println("ketutup bang");
+            }
+            else {
+                System.out.println("kaga ketutup");
+            }
+        }
+        else if (lastMode.equals("dfsFilling")) {
+            if (isClosed(event.getX(), event.getY())) {
+                System.out.println("ketutup bang");
+            }
+            else {
+                System.out.println("kaga ketutup");
+            }
+        }
         else {
             startX = event.getX();
             startY = event.getY();
@@ -178,6 +194,7 @@ public class PaintController {
             drawSelectBox(gcTop);
         }
         else if (lastMode.equals("move")) {
+            System.out.println(event.getY());
             double deltaX = event.getX() - startX;
             double deltaY = event.getY() - startY;
             selectStartX += deltaX;
@@ -475,5 +492,94 @@ public class PaintController {
             externalImages.add(selectedImage, temp);
             drawAllImages(gcImage);
         }
+    }
+
+    public static boolean isCursorOverLine(LineSegment line, double cursorX, double cursorY) {
+        double buffer = 5.0;
+        double distance = pointToLineDistance(line.startX, line.startY, line.endX, line.endY, cursorX, cursorY);
+        return distance <= buffer;
+    }
+
+    public static double pointToLineDistance(double x1, double y1, double x2, double y2, double px, double py) {
+        double A = px - x1;
+        double B = py - y1;
+        double C = x2 - x1;
+        double D = y2 - y1;
+
+        double dot = A * C + B * D;
+        double lenSq = C * C + D * D;
+        double param = dot / lenSq;
+
+        double xx, yy;
+
+        if (param < 0 || (x1 == x2 && y1 == y2)) {
+            xx = x1;
+            yy = y1;
+        } else if (param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        double dx = px - xx;
+        double dy = py - yy;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    @FXML
+    private void bfsFilling() {
+        lastMode = "bfsFilling";
+    }
+
+    @FXML
+    private void dfsFilling() {
+        lastMode = "dfsFilling";
+    }
+
+    private boolean isClosed(double x, double y) {
+        double localX = x;
+        double localY = y;
+        boolean passed = false;
+        boolean proceed = true;
+        boolean left = false;
+
+        // checking naik
+        while (proceed) {
+            for (LineSegment segment : lineSegments) {
+                if (localX <= -1 || localX >= bottomCanvas.getWidth() + 1 || localY <= -1 || localY >= bottomCanvas.getHeight() + 1) {
+                    proceed = false;
+                }
+
+                if (!left) {
+                    localX += 0.05;
+                    if (isCursorOverLine(segment, localX, localY)) {
+                        left = true;
+                        localY -= 0.05;
+                        localX = x;
+                        break;
+                    }
+                    else {
+                        localX += 0.05;
+                    }
+                }
+                else {
+                    localX -= 0.05;
+                    if (isCursorOverLine(segment, localX, localY)) {
+                        left = false;
+                        localY -= 0.05;
+                        localX = x;
+                        break;
+                    }
+                    else {
+                        localX -= 0.05;
+                    }
+                }
+            }
+            System.out.println(localY);
+        }
+
+        return passed;
     }
 }
