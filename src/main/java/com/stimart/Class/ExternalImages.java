@@ -6,6 +6,8 @@ public class ExternalImages {
 
     public Image image;
     public double imageX, imageY;
+    public int blur = 0;
+
 
     public ExternalImages(Image image, double imageX, double imageY) {
         this.image = image;

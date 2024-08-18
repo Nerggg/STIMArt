@@ -8,6 +8,7 @@ import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -35,6 +36,10 @@ public class PaintController {
     private Slider sizeSlider;
     @FXML
     private TextField sizeField;
+    @FXML
+    private Slider blurSlider;
+    @FXML
+    private Label blurLevel;
 
     private GraphicsContext gcBottom;
     private GraphicsContext gcTop;
@@ -97,6 +102,18 @@ public class PaintController {
                 setPenSize(Double.valueOf(sizeField.getText()));
             }
         });
+
+        blurSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (selectedImage == -1) {
+                blurSlider.setValue(0);
+                blurLevel.setText("Blur Level: 0");
+            } else {
+                blurLevel.setText("Blur Level: " + newValue.intValue());
+                externalImages.get(selectedImage).blur = newValue.intValue();
+
+            }
+        });
+
     }
 
     @FXML
@@ -158,6 +175,8 @@ public class PaintController {
                     selectEndY = externalImages.get(i).image.getHeight() + externalImages.get(i).imageY;
                     drawSelectBox(gcTop);
                     selectedImage = i;
+                    blurLevel.setText("Blur Level: " + externalImages.get(i).blur);
+                    blurSlider.setValue(externalImages.get(i).blur);
                     break;
                 }
             }
@@ -304,6 +323,9 @@ public class PaintController {
         selectStartY = 0;
         selectEndY = 0;
         lineSegments.addAll(pasteTemp);
+
+        blurSlider.setValue(0);
+        blurLevel.setText("Blur Level: 0");
     }
 
     private void drawAll(GraphicsContext gc) {
@@ -390,7 +412,6 @@ public class PaintController {
 
             for (LineSegment segment : pasteTemp) {
                 try {
-                    // Parse line into a LineSegment
                     segment.endX -= minStartX;
                     segment.endY -= minStartY;
                     segment.startX -= minStartX;
@@ -510,4 +531,6 @@ public class PaintController {
         double dy = py - yy;
         return Math.sqrt(dx * dx + dy * dy);
     }
+
+
 }
