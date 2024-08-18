@@ -48,7 +48,7 @@ public class ImageBlurring {
                 pixelCount++;
             }
         }
-        
+
         double avgRed = (double) totalRed / pixelCount / 255;
         double avgGreen = (double) totalGreen / pixelCount / 255;
         double avgBlue = (double) totalBlue / pixelCount / 255;
@@ -70,4 +70,32 @@ public class ImageBlurring {
 
         return writableImage;
     }
+
+    public static Image mergeImage(Image[] images) {
+        if (images == null || images.length != 4) {
+            throw new IllegalArgumentException("Array must contain exactly 4 images.");
+        }
+
+        int halfWidth = (int) images[0].getWidth();
+        int halfHeight = (int) images[0].getHeight();
+
+        WritableImage mergedImage = new WritableImage(halfWidth * 2, halfHeight * 2);
+        PixelWriter writer = mergedImage.getPixelWriter();
+
+        for (int y = 0; y < halfHeight; y++) {
+            for (int x = 0; x < halfWidth; x++) {
+                // Top-left
+                writer.setArgb(x, y, images[0].getPixelReader().getArgb(x, y));
+                // Top-right
+                writer.setArgb(x + halfWidth, y, images[1].getPixelReader().getArgb(x, y));
+                // Bottom-left
+                writer.setArgb(x, y + halfHeight, images[2].getPixelReader().getArgb(x, y));
+                // Bottom-right
+                writer.setArgb(x + halfWidth, y + halfHeight, images[3].getPixelReader().getArgb(x, y));
+            }
+        }
+
+        return mergedImage;
+    }
+
 }
