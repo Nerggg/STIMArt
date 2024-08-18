@@ -162,22 +162,6 @@ public class PaintController {
                 }
             }
         }
-        else if (lastMode.equals("bfsFilling")) {
-            if (isClosed(event.getX(), event.getY())) {
-                System.out.println("ketutup bang");
-            }
-            else {
-                System.out.println("kaga ketutup");
-            }
-        }
-        else if (lastMode.equals("dfsFilling")) {
-            if (isClosed(event.getX(), event.getY())) {
-                System.out.println("ketutup bang");
-            }
-            else {
-                System.out.println("kaga ketutup");
-            }
-        }
         else {
             startX = event.getX();
             startY = event.getY();
@@ -194,7 +178,6 @@ public class PaintController {
             drawSelectBox(gcTop);
         }
         else if (lastMode.equals("move")) {
-            System.out.println(event.getY());
             double deltaX = event.getX() - startX;
             double deltaY = event.getY() - startY;
             selectStartX += deltaX;
@@ -526,60 +509,5 @@ public class PaintController {
         double dx = px - xx;
         double dy = py - yy;
         return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    @FXML
-    private void bfsFilling() {
-        lastMode = "bfsFilling";
-    }
-
-    @FXML
-    private void dfsFilling() {
-        lastMode = "dfsFilling";
-    }
-
-    private boolean isClosed(double x, double y) {
-        double localX = x;
-        double localY = y;
-        boolean passed = false;
-        boolean proceed = true;
-        boolean left = false;
-
-        // checking naik
-        while (proceed) {
-            for (LineSegment segment : lineSegments) {
-                if (localX <= -1 || localX >= bottomCanvas.getWidth() + 1 || localY <= -1 || localY >= bottomCanvas.getHeight() + 1) {
-                    proceed = false;
-                }
-
-                if (!left) {
-                    localX += 0.05;
-                    if (isCursorOverLine(segment, localX, localY)) {
-                        left = true;
-                        localY -= 0.05;
-                        localX = x;
-                        break;
-                    }
-                    else {
-                        localX += 0.05;
-                    }
-                }
-                else {
-                    localX -= 0.05;
-                    if (isCursorOverLine(segment, localX, localY)) {
-                        left = false;
-                        localY -= 0.05;
-                        localX = x;
-                        break;
-                    }
-                    else {
-                        localX -= 0.05;
-                    }
-                }
-            }
-            System.out.println(localY);
-        }
-
-        return passed;
     }
 }

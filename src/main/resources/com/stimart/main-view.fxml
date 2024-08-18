@@ -22,8 +22,6 @@
       <Button onAction="#openImage" text="Open Image" />
       <Button onAction="#upwardImage" text="Upward" />
       <Button onAction="#downwardImage" text="Downward" />
-      <Button onAction="#bfsFilling" text="BFS Filling" />
-      <Button onAction="#dfsFilling" text="DFS Filling" />
     </ToolBar>
   </top>
   <center>
