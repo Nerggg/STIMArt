@@ -5,10 +5,11 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import java.util.ArrayList;
 
 public class ImageBlurring {
 
-    public static Image[] splitImage(Image image) {
+    public static ArrayList<Image> splitImage(Image image) {
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();
 
@@ -16,13 +17,19 @@ public class ImageBlurring {
         int halfHeight = height / 2;
 
         PixelReader reader = image.getPixelReader();
-        
+
         WritableImage topLeft = new WritableImage(reader, 0, 0, halfWidth, halfHeight);
         WritableImage topRight = new WritableImage(reader, halfWidth, 0, halfWidth, halfHeight);
         WritableImage bottomLeft = new WritableImage(reader, 0, halfHeight, halfWidth, halfHeight);
         WritableImage bottomRight = new WritableImage(reader, halfWidth, halfHeight, halfWidth, halfHeight);
 
-        return new Image[]{topLeft, topRight, bottomLeft, bottomRight};
+        ArrayList<Image> imageList = new ArrayList<>();
+        imageList.add(topLeft);
+        imageList.add(topRight);
+        imageList.add(bottomLeft);
+        imageList.add(bottomRight);
+
+        return imageList;
     }
 
     public static Color calculateAverageColor(Image image) {
@@ -71,13 +78,13 @@ public class ImageBlurring {
         return writableImage;
     }
 
-    public static Image mergeImage(Image[] images) {
-        if (images == null || images.length != 4) {
-            throw new IllegalArgumentException("Array must contain exactly 4 images.");
+    public static Image mergeImage(ArrayList<Image> images) {
+        if (images == null || images.size() != 4) {
+            throw new IllegalArgumentException("ArrayList must contain exactly 4 images.");
         }
 
-        int halfWidth = (int) images[0].getWidth();
-        int halfHeight = (int) images[0].getHeight();
+        int halfWidth = (int) images.get(0).getWidth();
+        int halfHeight = (int) images.get(0).getHeight();
 
         WritableImage mergedImage = new WritableImage(halfWidth * 2, halfHeight * 2);
         PixelWriter writer = mergedImage.getPixelWriter();
@@ -85,17 +92,29 @@ public class ImageBlurring {
         for (int y = 0; y < halfHeight; y++) {
             for (int x = 0; x < halfWidth; x++) {
                 // Top-left
-                writer.setArgb(x, y, images[0].getPixelReader().getArgb(x, y));
+                writer.setArgb(x, y, images.get(0).getPixelReader().getArgb(x, y));
                 // Top-right
-                writer.setArgb(x + halfWidth, y, images[1].getPixelReader().getArgb(x, y));
+                writer.setArgb(x + halfWidth, y, images.get(1).getPixelReader().getArgb(x, y));
                 // Bottom-left
-                writer.setArgb(x, y + halfHeight, images[2].getPixelReader().getArgb(x, y));
+                writer.setArgb(x, y + halfHeight, images.get(2).getPixelReader().getArgb(x, y));
                 // Bottom-right
-                writer.setArgb(x + halfWidth, y + halfHeight, images[3].getPixelReader().getArgb(x, y));
+                writer.setArgb(x + halfWidth, y + halfHeight, images.get(3).getPixelReader().getArgb(x, y));
             }
         }
 
         return mergedImage;
     }
 
+    public static Image blurImage(Image image, int level) {
+        if (level == 0) {
+            return image;
+        }
+        else {
+            ArrayList<Image> temp = splitImage(image);
+            for (int i = 0; i < temp.size(); i++) {
+                temp.set(i, applyAverageColor(temp.get(i), calculateAverageColor(temp.get(i))));
+            }
+            return mergeImage(temp);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.stimart.Controller;
 
 import com.stimart.Class.ExternalImages;
 import com.stimart.Class.LineSegment;
+import com.stimart.Class.ImageBlurring;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
@@ -110,7 +111,7 @@ public class PaintController {
             } else {
                 blurLevel.setText("Blur Level: " + newValue.intValue());
                 externalImages.get(selectedImage).blur = newValue.intValue();
-
+                externalImages.get(selectedImage).image = ImageBlurring.blurImage(externalImages.get(selectedImage).image, 9);
             }
         });
 
