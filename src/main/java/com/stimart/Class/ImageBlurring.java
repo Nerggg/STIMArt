@@ -110,7 +110,13 @@ public class ImageBlurring {
             return image.originalImage;
         }
         else {
-            return blurImage(image.originalImage, level);
+            int determine = (int) (Math.min(image.image.getHeight(), image.image.getWidth()));
+            int i;
+            for (i = 1; i < level; i++) {
+                determine /= 2;
+                if (determine <= 1) break;
+            }
+            return blurImage(image.originalImage, i);
         }
     }
 
