@@ -1,5 +1,6 @@
 package com.stimart.Controller;
 
+import com.stimart.Class.ColorDepth;
 import com.stimart.Class.ExternalImages;
 import com.stimart.Class.LineSegment;
 import com.stimart.Class.ImageBlurring;
@@ -8,10 +9,7 @@ import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
@@ -34,6 +32,10 @@ public class PaintController {
     @FXML
     private ColorPicker colorPicker;
     @FXML
+    private Button upwardButton;
+    @FXML
+    private Button downwardButton;
+    @FXML
     private Slider sizeSlider;
     @FXML
     private TextField sizeField;
@@ -41,6 +43,10 @@ public class PaintController {
     private Slider blurSlider;
     @FXML
     private Label blurLevel;
+    @FXML
+    private Slider colorDepthSlider;
+    @FXML
+    private Label colorDepthLabel;
 
     private GraphicsContext gcBottom;
     private GraphicsContext gcTop;
@@ -105,10 +111,7 @@ public class PaintController {
         });
 
         blurSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (selectedImage == -1) {
-                blurSlider.setValue(0);
-                blurLevel.setText("Blur Level: 0");
-            } else {
+            if (selectedImage != -1) {
                 blurLevel.setText("Blur Level: " + newValue.intValue());
                 externalImages.get(selectedImage).blur = newValue.intValue();
                 if (newValue.intValue() == 0) {
@@ -121,6 +124,24 @@ public class PaintController {
             }
         });
 
+        colorDepthSlider.setValue(24);
+        colorDepthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (selectedImage != -1) {
+                if (newValue.intValue() % 4 == 0) {
+                    colorDepthLabel.setText("Color Depth: " + newValue.intValue() + " bit");
+                    externalImages.get(selectedImage).colorDepth = newValue.intValue();
+                    externalImages.get(selectedImage).image = ColorDepth.reduceColorDepth(externalImages.get(selectedImage), newValue.intValue());
+                }
+                drawAllImages(gcImage);
+            }
+        });
+
+        colorDepthSlider.setVisible(false);
+        colorDepthLabel.setVisible(false);
+        blurSlider.setVisible(false);
+        blurLevel.setVisible(false);
+        upwardButton.setVisible(false);
+        downwardButton.setVisible(false);
     }
 
     @FXML
@@ -184,6 +205,13 @@ public class PaintController {
                     selectedImage = i;
                     blurLevel.setText("Blur Level: " + externalImages.get(i).blur);
                     blurSlider.setValue(externalImages.get(i).blur);
+
+                    colorDepthSlider.setVisible(true);
+                    colorDepthLabel.setVisible(true);
+                    blurSlider.setVisible(true);
+                    blurLevel.setVisible(true);
+                    upwardButton.setVisible(true);
+                    downwardButton.setVisible(true);
                     break;
                 }
             }
@@ -322,6 +350,13 @@ public class PaintController {
     private void resetSelectBox(GraphicsContext gc) {
         if (selectedImage != -1) {
             selectedImage = -1;
+
+            colorDepthSlider.setVisible(false);
+            colorDepthLabel.setVisible(false);
+            blurSlider.setVisible(false);
+            blurLevel.setVisible(false);
+            upwardButton.setVisible(false);
+            downwardButton.setVisible(false);
         }
 
         gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
@@ -467,6 +502,14 @@ public class PaintController {
             drawSelectBox(gcTop);
             drawAllImages(gcImage);
             selectedImage = externalImages.size() - 1;
+
+            colorDepthSlider.setVisible(true);
+            colorDepthLabel.setVisible(true);
+            blurSlider.setVisible(true);
+            blurLevel.setVisible(true);
+            upwardButton.setVisible(true);
+            downwardButton.setVisible(true);
+
         }
     }
 

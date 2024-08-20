@@ -8,6 +8,7 @@ public class ExternalImages {
     public Image image;
     public double imageX, imageY;
     public int blur = 0;
+    public int colorDepth = 24;
 
 
     public ExternalImages(Image image, double imageX, double imageY) {

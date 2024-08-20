@@ -21,10 +21,12 @@
          <Slider fx:id="sizeSlider" blockIncrement="1.0" max="20.0" min="1.0" />
          <TextField fx:id="sizeField" prefHeight="26.0" prefWidth="36.0" text="1" />
       <Button onAction="#openImage" text="Open Image" />
-      <Button onAction="#upwardImage" text="Upward" />
-      <Button onAction="#downwardImage" text="Downward" />
+      <Button fx:id="upwardButton" onAction="#upwardImage" text="Upward" />
+      <Button fx:id="downwardButton" onAction="#downwardImage" text="Downward" />
          <Slider fx:id="blurSlider" blockIncrement="1.0" max="10.0"/>
          <Label fx:id="blurLevel" text="Blur level: 0" />
+      <Slider fx:id="colorDepthSlider" showTickMarks="true" minorTickCount="0" snapToTicks="true" majorTickUnit="4.0" blockIncrement="4.0" max="24.0" min="4.0"/>
+      <Label fx:id="colorDepthLabel" text="Color Depth: 24 bit" />
     </ToolBar>
   </top>
   <center>

@@ -105,18 +105,18 @@ public class ImageBlurring {
         return mergedImage;
     }
 
-    public static Image blurImageCaller(ExternalImages image, int level) {
+    public static Image blurImageCaller(ExternalImages ei, int level) {
         if (level == 0) {
-            return image.originalImage;
+            return ei.originalImage;
         }
         else {
-            int determine = (int) (Math.min(image.image.getHeight(), image.image.getWidth()));
+            int determine = (int) (Math.min(ei.image.getHeight(), ei.image.getWidth()));
             int i;
             for (i = 1; i < level; i++) {
                 determine /= 2;
                 if (determine <= 1) break;
             }
-            return blurImage(image.originalImage, i);
+            return blurImage(ei.originalImage, i);
         }
     }
 
