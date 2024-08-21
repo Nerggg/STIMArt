@@ -141,6 +141,10 @@ public class PaintController {
             }
         });
 
+        blurSlider.setOnMouseReleased(event -> {
+            stateArray.addState(lineSegments, externalImages);
+        });
+
         colorDepthSlider.setValue(24);
         colorDepthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (selectedImage != -1) {
@@ -158,6 +162,10 @@ public class PaintController {
                 }
                 drawAllImages(gcImage);
             }
+        });
+
+        colorDepthSlider.setOnMouseReleased(event -> {
+            stateArray.addState(lineSegments, externalImages);
         });
 
         Pattern validPattern = Pattern.compile("([0-2](\\.\\d{0,1})?|3(\\.0?)?)");
@@ -242,6 +250,7 @@ public class PaintController {
                 externalImages.remove(selectedImage);
                 drawAllImages(gcImage);
             }
+            stateArray.addState(lineSegments, externalImages);
             resetSelectBox(gcTop);
         }
     }
@@ -602,6 +611,7 @@ public class PaintController {
             selectedImage++;
             externalImages.add(selectedImage, temp);
             drawAllImages(gcImage);
+            stateArray.addState(lineSegments, externalImages);
         }
     }
 
@@ -612,6 +622,7 @@ public class PaintController {
             selectedImage--;
             externalImages.add(selectedImage, temp);
             drawAllImages(gcImage);
+            stateArray.addState(lineSegments, externalImages);
         }
     }
 
