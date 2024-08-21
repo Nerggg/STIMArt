@@ -32,7 +32,7 @@ public class StateArray {
         }
         states.add(state);
 
-        if (active > 1) {
+        if (states.get(active - 1).lineSegments.size() > 0) {
             states.get(active - 1).lineSegments.removeLast();
         }
     }
