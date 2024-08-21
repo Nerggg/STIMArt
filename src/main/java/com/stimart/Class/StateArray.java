@@ -25,11 +25,26 @@ public class StateArray {
         }
     }
 
-    public void addState(AppState state) {
+    public void addState(ArrayList<LineSegment> lineSegment, ArrayList<ExternalImages> externalImages) {
         active++;
         if (states.size() - 1 >= active) {
             deleteOnward(active);
         }
+
+        ArrayList<LineSegment> newLineSegment = new ArrayList<>();
+        ArrayList<ExternalImages> newExternalImages = new ArrayList<>();
+        for (LineSegment segment : lineSegment) {
+            LineSegment temp = new LineSegment(segment);
+            newLineSegment.add(temp);
+        }
+
+        for (ExternalImages ei : externalImages) {
+            ExternalImages temp = new ExternalImages(ei);
+            newExternalImages.add(temp);
+        }
+
+        AppState state = new AppState(newLineSegment, newExternalImages);
+
         states.add(state);
 
         if (states.get(active - 1).lineSegments.size() > 0) {

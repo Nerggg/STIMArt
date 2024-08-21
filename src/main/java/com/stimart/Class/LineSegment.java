@@ -16,6 +16,15 @@ public class LineSegment {
         this.size = size;
     }
 
+    public LineSegment(LineSegment other) {
+        this.startX = other.startX;
+        this.startY = other.startY;
+        this.endX = other.endX;
+        this.endY = other.endY;
+        this.color = other.color;
+        this.size = other.size;
+    }
+
     public boolean isWithin(double x, double y, double width, double height) {
         return (Math.min(startX, endX) >= x && Math.max(startX, endX) <= x + width &&
                 Math.min(startY, endY) >= y && Math.max(startY, endY) <= y + height);

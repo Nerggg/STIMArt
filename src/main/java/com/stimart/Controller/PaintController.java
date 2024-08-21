@@ -200,6 +200,7 @@ public class PaintController {
         }
         else if (event.isControlDown() && event.getCode() == KeyCode.O) {
             openImage();
+            stateArray.addState(lineSegments, externalImages);
         }
         else if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.Z) {
             stateArray.redo();
@@ -207,6 +208,7 @@ public class PaintController {
             externalImages = stateArray.states.get(stateArray.active).externalImages;
             drawAll(gcBottom);
             drawAllImages(gcImage);
+            resetSelectBox(gcTop);
         }
         else if (event.isControlDown() && event.getCode() == KeyCode.Z) {
             stateArray.undo();
@@ -214,6 +216,7 @@ public class PaintController {
             externalImages = stateArray.states.get(stateArray.active).externalImages;
             drawAll(gcBottom);
             drawAllImages(gcImage);
+            resetSelectBox(gcTop);
         }
         else if (event.getCode() == KeyCode.M) {
             useMove();
@@ -336,7 +339,7 @@ public class PaintController {
             selectSegments(Math.min(selectStartX, selectEndX), Math.min(selectStartY, selectEndY), Math.abs(selectEndX - selectStartX), Math.abs(selectEndY - selectStartY));
         }
         eraseSegments.clear();
-        stateArray.addState(new AppState(lineSegments, externalImages));
+        stateArray.addState(lineSegments, externalImages);
     }
 
     @FXML

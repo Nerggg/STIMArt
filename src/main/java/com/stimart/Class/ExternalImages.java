@@ -20,4 +20,16 @@ public class ExternalImages {
         this.imageX = imageX;
         this.imageY = imageY;
     }
+
+    public ExternalImages(ExternalImages other) {
+        this.veryOriginalImage = other.image;
+        this.originalImage = other.image;
+        this.image = other.image;
+        this.imageX = other.imageX;
+        this.imageY = other.imageY;
+        this.blur = other.blur;
+        this.colorDepth = other.colorDepth;
+        this.blurred = other.blurred;
+        this.depthReduced = other.depthReduced;
+    }
 }
