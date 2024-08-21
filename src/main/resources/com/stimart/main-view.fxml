@@ -34,10 +34,10 @@
   </top>
   <center>
     <StackPane>
-      <Canvas fx:id="whiteCanvas" height="720" width="1280" />
-      <Canvas fx:id="imageCanvas" height="720" width="1280" />
-      <Canvas fx:id="bottomCanvas" height="720" width="1280" />
-      <Canvas fx:id="topCanvas" height="720" width="1280" />
+      <Canvas fx:id="whiteCanvas" height="500" width="1280" />
+      <Canvas fx:id="imageCanvas" height="500" width="1280" />
+      <Canvas fx:id="bottomCanvas" height="500" width="1280" />
+      <Canvas fx:id="topCanvas" height="500" width="1280" />
     </StackPane>
   </center>
 </BorderPane>

@@ -1,5 +1,6 @@
 package com.stimart.Controller;
 
+import com.stimart.App;
 import com.stimart.Class.*;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -13,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.function.UnaryOperator;
@@ -73,6 +75,9 @@ public class PaintController {
     // external images
     private ArrayList<ExternalImages> externalImages = new ArrayList<>();
     private int selectedImage = -1;
+
+    // states
+    private StateArray stateArray = new StateArray();
 
     @FXML
     public void initialize() {
@@ -196,6 +201,20 @@ public class PaintController {
         else if (event.isControlDown() && event.getCode() == KeyCode.O) {
             openImage();
         }
+        else if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.Z) {
+            stateArray.redo();
+            lineSegments = stateArray.states.get(stateArray.active).lineSegments;
+            externalImages = stateArray.states.get(stateArray.active).externalImages;
+            drawAll(gcBottom);
+            drawAllImages(gcImage);
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.Z) {
+            stateArray.undo();
+            lineSegments = stateArray.states.get(stateArray.active).lineSegments;
+            externalImages = stateArray.states.get(stateArray.active).externalImages;
+            drawAll(gcBottom);
+            drawAllImages(gcImage);
+        }
         else if (event.getCode() == KeyCode.M) {
             useMove();
         }
@@ -317,6 +336,7 @@ public class PaintController {
             selectSegments(Math.min(selectStartX, selectEndX), Math.min(selectStartY, selectEndY), Math.abs(selectEndX - selectStartX), Math.abs(selectEndY - selectStartY));
         }
         eraseSegments.clear();
+        stateArray.addState(new AppState(lineSegments, externalImages));
     }
 
     @FXML
