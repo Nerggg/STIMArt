@@ -1,9 +1,6 @@
 package com.stimart.Controller;
 
-import com.stimart.Class.ColorDepth;
-import com.stimart.Class.ExternalImages;
-import com.stimart.Class.LineSegment;
-import com.stimart.Class.ImageBlurring;
+import com.stimart.Class.*;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
@@ -18,6 +15,8 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 public class PaintController {
 
@@ -47,6 +46,12 @@ public class PaintController {
     private Slider colorDepthSlider;
     @FXML
     private Label colorDepthLabel;
+    @FXML
+    private Button segmentButton;
+    @FXML
+    private Label segmentThresholdLabel;
+    @FXML
+    private TextField segmentThreshold;
 
     private GraphicsContext gcBottom;
     private GraphicsContext gcTop;
@@ -150,12 +155,28 @@ public class PaintController {
             }
         });
 
+        Pattern validPattern = Pattern.compile("([0-2](\\.\\d{0,1})?|3(\\.0?)?)");
+
+        UnaryOperator<TextFormatter.Change> filter = change -> {
+            String newText = change.getControlNewText();
+            if (validPattern.matcher(newText).matches()) {
+                return change;
+            }
+            return null;
+        };
+
+        TextFormatter<String> textFormatter = new TextFormatter<>(filter);
+        segmentThreshold.setTextFormatter(textFormatter);
+
         colorDepthSlider.setVisible(false);
         colorDepthLabel.setVisible(false);
         blurSlider.setVisible(false);
         blurLevel.setVisible(false);
         upwardButton.setVisible(false);
         downwardButton.setVisible(false);
+        segmentButton.setVisible(false);
+        segmentThresholdLabel.setVisible(false);
+        segmentThreshold.setVisible(false);
     }
 
     @FXML
@@ -226,6 +247,9 @@ public class PaintController {
                     blurLevel.setVisible(true);
                     upwardButton.setVisible(true);
                     downwardButton.setVisible(true);
+                    segmentButton.setVisible(true);
+                    segmentThresholdLabel.setVisible(true);
+                    segmentThreshold.setVisible(true);
                     break;
                 }
             }
@@ -371,6 +395,9 @@ public class PaintController {
             blurLevel.setVisible(false);
             upwardButton.setVisible(false);
             downwardButton.setVisible(false);
+            segmentButton.setVisible(false);
+            segmentThresholdLabel.setVisible(false);
+            segmentThreshold.setVisible(false);
         }
 
         gcTop.clearRect(0, 0, topCanvas.getWidth(), topCanvas.getHeight());
@@ -523,6 +550,9 @@ public class PaintController {
             blurLevel.setVisible(true);
             upwardButton.setVisible(true);
             downwardButton.setVisible(true);
+            segmentButton.setVisible(true);
+            segmentThresholdLabel.setVisible(true);
+            segmentThreshold.setVisible(true);
 
         }
     }
@@ -596,5 +626,8 @@ public class PaintController {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-
+    @FXML
+    private void segmentImage() {
+        ImageSegmentation.segmentImage(externalImages, selectedImage, colorPicker.getValue(), Double.valueOf(segmentThreshold.getText()));
+    }
 }

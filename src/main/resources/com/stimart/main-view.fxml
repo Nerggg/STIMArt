@@ -18,23 +18,26 @@
       <Button onAction="#useEraser" text="Eraser" />
       <Button onAction="#useSelect" text="Select" />
       <ColorPicker fx:id="colorPicker" onAction="#changePenColor" />
-         <Slider fx:id="sizeSlider" blockIncrement="1.0" max="20.0" min="1.0" />
+         <Slider fx:id="sizeSlider" blockIncrement="1.0" max="20.0" min="1.0" prefWidth="90.0" />
          <TextField fx:id="sizeField" prefHeight="26.0" prefWidth="36.0" text="1" />
       <Button onAction="#openImage" text="Open Image" />
       <Button fx:id="upwardButton" onAction="#upwardImage" text="Upward" />
       <Button fx:id="downwardButton" onAction="#downwardImage" text="Downward" />
-         <Slider fx:id="blurSlider" blockIncrement="1.0" max="10.0"/>
+         <Slider fx:id="blurSlider" blockIncrement="1.0" max="10.0" prefWidth="90.0" />
          <Label fx:id="blurLevel" text="Blur level: 0" />
-      <Slider fx:id="colorDepthSlider" showTickMarks="true" minorTickCount="0" snapToTicks="true" majorTickUnit="4.0" blockIncrement="4.0" max="24.0" min="4.0"/>
+      <Slider fx:id="colorDepthSlider" blockIncrement="4.0" majorTickUnit="4.0" max="24.0" min="4.0" minorTickCount="0" prefWidth="90.0" showTickMarks="true" snapToTicks="true" />
       <Label fx:id="colorDepthLabel" text="Color Depth: 24 bit" />
+      <Button fx:id="segmentButton" onAction="#segmentImage" text="Segment Image" />
+      <Label fx:id="segmentThresholdLabel" text="Threshold: " />
+      <TextField fx:id="segmentThreshold" prefHeight="26.0" prefWidth="36.0" text="0.5" />
     </ToolBar>
   </top>
   <center>
     <StackPane>
-      <Canvas fx:id="whiteCanvas" height="500" width="1280" />
-      <Canvas fx:id="imageCanvas" height="500" width="1280" />
-      <Canvas fx:id="bottomCanvas" height="500" width="1280" />
-      <Canvas fx:id="topCanvas" height="500" width="1280" />
+      <Canvas fx:id="whiteCanvas" height="720" width="1280" />
+      <Canvas fx:id="imageCanvas" height="720" width="1280" />
+      <Canvas fx:id="bottomCanvas" height="720" width="1280" />
+      <Canvas fx:id="topCanvas" height="720" width="1280" />
     </StackPane>
   </center>
 </BorderPane>
