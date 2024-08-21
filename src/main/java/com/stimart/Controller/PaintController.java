@@ -112,6 +112,13 @@ public class PaintController {
 
         blurSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (selectedImage != -1) {
+                externalImages.get(selectedImage).originalImage = externalImages.get(selectedImage).veryOriginalImage;
+                if (externalImages.get(selectedImage).depthReduced) {
+                    externalImages.get(selectedImage).originalImage = ColorDepth.reduceColorDepth(externalImages.get(selectedImage), externalImages.get(selectedImage).colorDepth);
+                }
+
+                externalImages.get(selectedImage).blurred = newValue.intValue() != 0;
+
                 blurLevel.setText("Blur Level: " + newValue.intValue());
                 externalImages.get(selectedImage).blur = newValue.intValue();
                 if (newValue.intValue() == 0) {
@@ -127,7 +134,14 @@ public class PaintController {
         colorDepthSlider.setValue(24);
         colorDepthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (selectedImage != -1) {
+                externalImages.get(selectedImage).originalImage = externalImages.get(selectedImage).veryOriginalImage;
+                if (externalImages.get(selectedImage).blurred) {
+                    externalImages.get(selectedImage).originalImage = ImageBlurring.blurImageCaller(externalImages.get(selectedImage), 11 - externalImages.get(selectedImage).blur);
+                }
+
                 if (newValue.intValue() % 4 == 0) {
+                    externalImages.get(selectedImage).depthReduced = newValue.intValue() != 24;
+
                     colorDepthLabel.setText("Color Depth: " + newValue.intValue() + " bit");
                     externalImages.get(selectedImage).colorDepth = newValue.intValue();
                     externalImages.get(selectedImage).image = ColorDepth.reduceColorDepth(externalImages.get(selectedImage), newValue.intValue());
