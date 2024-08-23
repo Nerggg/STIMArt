@@ -97,6 +97,20 @@ Untuk fitur ini, digunakan algoritma Backtracking. Setiap pengguna melakukan ses
 1. Pastikan sudah menginstall [Java versi 22.0.1 atau yang lebih baru](https://www.oracle.com/java/technologies/downloads/).
 2. Buka `STIMArt.jar`
 
+Selain itu, juga terdapat shortcut untuk tools yang ada pada aplikasi. Yaitu sebagai berikut:
+- M untuk Move
+- P untuk Pen
+- E untuk Eraser
+- S untuk Select
+- DELETE untuk menghapus benda yang diselect
+- CTRL + C untuk copy
+- CTRL + X untuk cut
+- CTRL + V untuk paste
+- CTRL + Z untuk undo
+- CTRL + SHIFT + Z untuk redo
+- CTRL + O untuk mengimpor gambar
+- CTRL + S untuk menyimpan semua gambar yang ada pada kanvas
+
 ## Hasil Percobaan
 
 - Image Blurring
