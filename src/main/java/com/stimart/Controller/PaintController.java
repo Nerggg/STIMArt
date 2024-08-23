@@ -1,7 +1,7 @@
 package com.stimart.Controller;
 
-import com.stimart.App;
 import com.stimart.Class.*;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
@@ -9,13 +9,18 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import javax.swing.plaf.nimbus.State;
+import javax.imageio.ImageIO;
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -209,6 +214,9 @@ public class PaintController {
         else if (event.isControlDown() && event.getCode() == KeyCode.O) {
             openImage();
             stateArray.addState(lineSegments, externalImages);
+        }
+        else if (event.isControlDown() && event.getCode() == KeyCode.S) {
+            saveCanvasToFile();
         }
         else if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.Z) {
             stateArray.redo();
@@ -437,7 +445,7 @@ public class PaintController {
         selectEndX = 0;
         selectStartY = 0;
         selectEndY = 0;
-        lineSegments.addAll(pasteTemp);
+//        lineSegments.addAll(pasteTemp);
 
         blurSlider.setValue(0);
         blurLevel.setText("Blur Level: 0");
@@ -450,11 +458,11 @@ public class PaintController {
             gc.setLineWidth(segment.size);
             gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
         }
-        for (LineSegment segment : pasteTemp) {
-            gc.setStroke(segment.color);
-            gc.setLineWidth(segment.size);
-            gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
-        }
+//        for (LineSegment segment : pasteTemp) {
+//            gc.setStroke(segment.color);
+//            gc.setLineWidth(segment.size);
+//            gc.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
+//        }
     }
 
     private void selectSegments(double boxX, double boxY, double boxWidth, double boxHeight) {
@@ -535,6 +543,7 @@ public class PaintController {
                     selectEndY = formerSelectEndY - formerSelectStartY;
                     selectStartX = 0;
                     selectStartY = 0;
+                    lineSegments.add(segment);
                     drawSelectBox(gcTop);
                     drawAll(gcBottom);
                     selectedSegments.add(segment);
@@ -663,5 +672,40 @@ public class PaintController {
     @FXML
     private void segmentImage() {
         ImageSegmentation.segmentImage(externalImages, selectedImage, colorPicker.getValue(), Double.valueOf(segmentThreshold.getText()));
+    }
+
+    private void saveCanvasToFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Image");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                Canvas saveImageCanvas = new Canvas(bottomCanvas.getWidth(), bottomCanvas.getHeight());
+                GraphicsContext saveImageGC = saveImageCanvas.getGraphicsContext2D();
+                saveImageGC.clearRect(0, 0, saveImageGC.getCanvas().getWidth(), saveImageGC.getCanvas().getHeight());
+                for (ExternalImages ei : externalImages) {
+                    saveImageGC.drawImage(ei.image, ei.imageX, ei.imageY, ei.image.getWidth(), ei.image.getHeight());
+                }
+                for (LineSegment segment : lineSegments) {
+                    saveImageGC.setStroke(segment.color);
+                    saveImageGC.setLineWidth(segment.size);
+                    saveImageGC.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
+                }
+                for (LineSegment segment : pasteTemp) {
+                    saveImageGC.setStroke(segment.color);
+                    saveImageGC.setLineWidth(segment.size);
+                    saveImageGC.strokeLine(segment.startX, segment.startY, segment.endX, segment.endY);
+                }
+
+                WritableImage saveImage = new WritableImage((int) bottomCanvas.getWidth(), (int) bottomCanvas.getHeight());
+                saveImageCanvas.snapshot(null, saveImage);
+
+                ImageIO.write(SwingFXUtils.fromFXImage(saveImage, null), "png", file);
+            } catch (IOException ex) {
+                System.out.println("Failed to save image: " + ex.getMessage());
+            }
+        }
     }
 }
