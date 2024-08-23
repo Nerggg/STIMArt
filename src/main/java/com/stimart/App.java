@@ -23,7 +23,7 @@ public class App extends Application {
             controller.checkShortcutMode(event);
         });
 
-        primaryStage.setTitle("Paint App");
+        primaryStage.setTitle("STIMArt");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
